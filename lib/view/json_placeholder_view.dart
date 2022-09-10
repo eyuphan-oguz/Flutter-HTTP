@@ -12,22 +12,24 @@ class JsonPlaceHolderView extends StatefulWidget {
 }
 
 class _JsonPlaceHolderViewState extends State<JsonPlaceHolderView> {
-  @override
-  void initState() {
-    super.initState();
-    getJsonPlaceHolderDatas();
 
-  }
 
-  Future<PostData> getJsonPlaceHolderDatas() async {
-    final _response =
-    await http.get( Uri.parse("https://jsonplaceholder.typicode.com/posts/1"));
 
-    final _mapJson = json.decode(_response.body);
-    var post = PostData.fromJson(_mapJson);
+    Future<PostData> fetchPostData() async {
+      final response = await http
+          .get(Uri.parse('https://jsonplaceholder.typicode.com/posts/1'));
 
-    return post;
-  }
+      if (response.statusCode == 200) {
+        // If the server did return a 200 OK response,
+        // then parse the JSON.
+        return PostData.fromJson(jsonDecode(response.body));
+      } else {
+        // If the server did not return a 200 OK response,
+        // then throw an exception.
+        throw Exception('Failed to load PostData');
+      }
+    }
+
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +43,7 @@ class _JsonPlaceHolderViewState extends State<JsonPlaceHolderView> {
   }
 
   Widget get _placeHolderDatasWidget => FutureBuilder<PostData>(
-    future: getJsonPlaceHolderDatas(),
+    future: fetchPostData(),
     builder: (context, snapshot) {
       if (snapshot.hasData) {
         return ListTile(
